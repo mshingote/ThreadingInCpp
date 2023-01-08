@@ -48,7 +48,6 @@ int main()
                                          IsPatterComplete();
                         s_log << "Blocking: " << std::this_thread::get_id()
                               << ", with condition=" << condition;
-                        fflush(stdout);
                         return condition;
                     }
                 );
