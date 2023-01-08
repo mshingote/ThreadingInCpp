@@ -25,15 +25,14 @@ int main()
     static ThreadSafeLog s_log{};
 
 #ifdef DISABLE_CLOG
-    // Disabling logs
+    // Disabling logs at compile time
 #define s_log if constexpr(0) s_log
 #endif
-
-    static constexpr size_t k_NumberOfThreads = 3;
 
     // Array of std::thread with k_NumberOfThreads size
     std::array<std::thread, k_NumberOfThreads> threads{};
 
+    static_assert(k_NumberOfThreads == 3, "When thread count is changed, context array entries much be updated.");
     // Preparing context for each thread function.
     ThreadContext context[k_NumberOfThreads] =
     {
