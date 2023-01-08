@@ -1,0 +1,11 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+*.vsidx
+*.ipch
+/SynchronizeThreadsToPrint_aaabbc/SynchronizeThreadsToPrint_aaabbc/x64/*
+/SynchronizeThreadsToPrint_aaabbc/.vs/*
+/SynchronizeThreadsToPrint_aaabbc/x64/*
+*.filters
+*.user
