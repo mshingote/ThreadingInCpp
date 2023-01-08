@@ -24,34 +24,33 @@ static bool IsNumberReachedAtMax()
 	return ThreadContext::s_Number >= k_MaxNumber;
 }
 
-void ThreadFunction(ThreadContext& Context, uint8_t Reminder)
+void ThreadFunction(uint8_t Reminder)
 {
 	while (!IsNumberReachedAtMax())
 	{
-		std::unique_lock<std::mutex> lock(Context.s_Lock[Reminder]);
-		ThreadContext::s_Cv[Reminder].wait(lock, [&Context , &Reminder]()
+		std::unique_lock<std::mutex> lock(ThreadContext::s_Lock[Reminder]);
+		ThreadContext::s_Cv[Reminder].wait(lock, [&Reminder]()
 			{
 				if (IsNumberReachedAtMax())
 				{
 					return true;
 				}
-				return Context.s_Number % 2 == Reminder;
+				return ThreadContext::s_Number % 2 == Reminder;
 			}
 		);
 		if (IsNumberReachedAtMax())
 		{
 			return;
 		}
-		std::clog << (Reminder ? "\t\t\t\t\t" : "") << "\tCurrent thread: " << std::this_thread::get_id() << ", Number: " << Context.s_Number << "\n";
-		++Context.s_Number;
+		std::clog << (Reminder ? "\t\t\t\t\t" : "") << "\tCurrent thread: " << std::this_thread::get_id() << ", Number: " << ThreadContext::s_Number << "\n";
+		++ThreadContext::s_Number;
 		ThreadContext::s_Cv[!Reminder].notify_one();
 	}
 }
 int main()
 {
-	ThreadContext contextForEvent, contextForOdd;
-	std::thread EvenNumberProcessThread(ThreadFunction, std::ref(contextForEvent), 0);
-	std::thread OddNumberProcessThread(ThreadFunction, std::ref(contextForOdd), 1);
+	std::thread EvenNumberProcessThread(ThreadFunction, 0);
+	std::thread OddNumberProcessThread(ThreadFunction, 1);
 
 	EvenNumberProcessThread.join();
 	OddNumberProcessThread.join();
