@@ -1,0 +1,2 @@
+# Final output is
+aaabbcaaabbc

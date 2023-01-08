@@ -11,7 +11,7 @@
 #include <array>
 
 /************* Global Variables *******************/
-static constexpr size_t k_PatternSize = 100; // (aaabbc)*
+static constexpr size_t k_PatternSize = 2; // (aaabbc)*
 static constexpr size_t k_NumberOfThreads = 3;
 static constexpr uint64_t k_SleepForMilliseconds = 20;
 /*************************************************/
@@ -58,7 +58,9 @@ struct ThreadSafeLog
 			std::chrono::steady_clock::now().time_since_epoch()
 			).count();
 		assert(m_Stream.find(epoch) == m_Stream.end());
-		m_Stream[epoch] << "ThreadContext::s_Counter: " << ThreadContext::s_Counter.load() << ", thread_id: " << std::this_thread::get_id() << ", with condition: " << Condition << std::endl;
+		m_Stream[epoch] << "ThreadContext::s_Counter: " << ThreadContext::s_Counter.load()
+			            << ", thread_id: " << std::this_thread::get_id()
+			            << ", with condition: " << Condition << std::endl;
 		Print();
 		return *this;
 	}
@@ -71,7 +73,8 @@ struct ThreadSafeLog
 			).count();
 		assert(m_Stream.find(epoch) == m_Stream.end());
 
-		m_Stream[epoch] << "ThreadContext::s_Counter: " << ThreadContext::s_Counter.load() << ", thread_id: " << ThreadId << std::endl;
+		m_Stream[epoch] << "ThreadContext::s_Counter: " << ThreadContext::s_Counter.load()
+			            << ", thread_id: " << ThreadId << std::endl;
 		Print();
 		return *this;
 	}
@@ -83,7 +86,8 @@ struct ThreadSafeLog
 			std::chrono::steady_clock::now().time_since_epoch()
 			).count();
 		assert(m_Stream.find(epoch) == m_Stream.end());
-		m_Stream[epoch] << "ThreadContext::s_Counter: " << ThreadContext::s_Counter.load() << ", thread_id : " << std::this_thread::get_id() << ", " << Line << std::endl;
+		m_Stream[epoch] << "ThreadContext::s_Counter: " << ThreadContext::s_Counter.load()
+			            << ", thread_id : " << std::this_thread::get_id() << ", " << Line << std::endl;
 		Print();
 		return *this;
 	}
@@ -135,13 +139,17 @@ int main()
 				std::unique_lock<std::mutex> lock(ThreadContext::s_Lock[0]);
 				ThreadContext::s_Cv[0].wait(lock, []()
 					{
-						bool condition = ThreadContext::s_Counter.load() >= 0 && ThreadContext::s_Counter.load() <= 2 || IsPatterComplete();
-						g_log << "Blocking: " << std::this_thread::get_id() << ", with condition=" << condition;
+						bool condition = ThreadContext::s_Counter.load() >= 0 &&
+						                 ThreadContext::s_Counter.load() <= 2 ||
+					                     IsPatterComplete();
+						g_log << "Blocking: " << std::this_thread::get_id()
+							  << ", with condition=" << condition;
 						fflush(stdout);
 						return condition;
 					}
 				);
-				assert(ThreadContext::s_Counter.load() >= 0 && ThreadContext::s_Counter.load() <= 2);
+				assert(ThreadContext::s_Counter.load() >= 0 &&
+					   ThreadContext::s_Counter.load() <= 2);
 				g_log << "Unlocking: " << std::this_thread::get_id();
 				fflush(stdout);
 			},
@@ -165,14 +173,18 @@ int main()
 				std::unique_lock<std::mutex> lock(ThreadContext::s_Lock[1]);
 				ThreadContext::s_Cv[1].wait(lock, []()
 					{
-						bool condition = ThreadContext::s_Counter.load() >= 3 && ThreadContext::s_Counter.load() <= 4 || IsPatterComplete();
-						g_log << "Blocking: " << std::this_thread::get_id() << ", with condition=" << condition;
+						bool condition = ThreadContext::s_Counter.load() >= 3 &&
+						                 ThreadContext::s_Counter.load() <= 4 ||
+					                     IsPatterComplete();
+						g_log << "Blocking: " << std::this_thread::get_id()
+							  << ", with condition=" << condition;
 						return condition;
 					}
 				);
 				if (!IsPatterComplete())
 				{
-					assert(ThreadContext::s_Counter.load() >= 3 && ThreadContext::s_Counter.load() <= 4);
+					assert(ThreadContext::s_Counter.load() >= 3 &&
+						   ThreadContext::s_Counter.load() <= 4);
 				}
 				g_log << "Unlocking: " << std::this_thread::get_id();
 				fflush(stdout);
@@ -197,8 +209,10 @@ int main()
 				std::unique_lock<std::mutex> lock(ThreadContext::s_Lock[2]);
 				ThreadContext::s_Cv[2].wait(lock, []()
 					{
-						bool condition = ThreadContext::s_Counter.load() == 5 || IsPatterComplete();
-						g_log << "Blocking: " << std::this_thread::get_id() << ", with condition=" << condition;
+						bool condition = ThreadContext::s_Counter.load() == 5 ||
+						                 IsPatterComplete();
+						g_log << "Blocking: " << std::this_thread::get_id()
+							  << ", with condition=" << condition;
 						return condition;
 					}
 				);
@@ -230,24 +244,24 @@ int main()
 	for (size_t i = 0; i < k_NumberOfThreads; ++i)
 	{
 		threads[i] = std::thread([&context, i]()
-			{
-				auto& localContext = context[i];
-		while (ThreadContext::s_PatternCount <= k_PatternSize)
 		{
-			g_log << " Current Thread is: " << std::this_thread::get_id();
-			localContext.cb_WaitForCondition();
-			if (IsPatterComplete())
-			{
-				localContext.cb_ResetCounterToDefault();
-				localContext.cb_TryNotifyNextThread();
-				g_log << "Pattern complete, Exiting from thread: " << std::this_thread::get_id() << ", with Counter=" << ThreadContext::s_Counter.load();
-				return;
-			}
-			localContext.cb_PerformPrimaryTask();
-			localContext.cb_TryNotifyNextThread();
-		}
-			}
-		);
+				auto& localContext = context[i];
+				while (ThreadContext::s_PatternCount <= k_PatternSize)
+				{
+					g_log << " Current Thread is: " << std::this_thread::get_id();
+					localContext.cb_WaitForCondition();
+					if (IsPatterComplete())
+					{
+						localContext.cb_ResetCounterToDefault();
+						localContext.cb_TryNotifyNextThread();
+						g_log << "Pattern complete, Exiting from thread: " << std::this_thread::get_id()
+							  << ", with Counter=" << ThreadContext::s_Counter.load();
+						return;
+					}
+					localContext.cb_PerformPrimaryTask();
+					localContext.cb_TryNotifyNextThread();
+				}
+		});
 	}
 
 	for (size_t i = 0; i < k_NumberOfThreads; ++i)
