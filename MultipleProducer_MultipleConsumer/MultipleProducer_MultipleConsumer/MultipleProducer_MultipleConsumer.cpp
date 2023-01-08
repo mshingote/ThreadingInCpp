@@ -47,7 +47,7 @@ void Produce(SharedRingBuffer& Buffer)
             Buffer.m_Buffer[Buffer.m_WriteIndex] = number;
             std::clog << "thread_id: " << std::this_thread::get_id() << ", produced: " << number << ", at " << Buffer.m_WriteIndex << std::endl;
             Buffer.m_WriteIndex = (Buffer.m_WriteIndex + 1) % Buffer.m_Capacity;
-            Buffer.m_Empty.notify_all();
+            Buffer.m_Fulll.notify_all();
         }
     }
 }
@@ -58,14 +58,14 @@ void Consume(SharedRingBuffer& Buffer)
     {
         {
             std::unique_lock<std::mutex> lock(Buffer.m_Lock);
-            Buffer.m_Empty.wait(lock, [&] {
+            Buffer.m_Fulll.wait(lock, [&] {
                 return !Buffer.IsEmpty();
                 });
 
             uint16_t data = Buffer.m_Buffer.at(Buffer.m_ReadIndex);
             std::clog << "\t\t\t\t\t"<< "thread_id: "<<std::this_thread::get_id() << ", consumed: " << data << ", from: " << Buffer.m_ReadIndex << std::endl;
             Buffer.m_ReadIndex = (Buffer.m_ReadIndex + 1) % Buffer.m_Capacity;
-            Buffer.m_Fulll.notify_all();
+            Buffer.m_Empty.notify_all();
         }
     }
 }
