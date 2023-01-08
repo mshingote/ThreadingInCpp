@@ -130,6 +130,10 @@
   <ItemGroup>
     <ClCompile Include="SynchronizeThreadsToPrint_aaabbc.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ThreadContext.hpp" />
+    <ClInclude Include="ThreadSafeLogger.hpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
