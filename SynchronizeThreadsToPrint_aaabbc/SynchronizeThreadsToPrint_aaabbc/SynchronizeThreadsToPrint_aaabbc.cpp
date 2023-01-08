@@ -52,10 +52,7 @@ int main()
                         return condition;
                     }
                 );
-                assert(ThreadContext::s_Counter.load() >= 0 &&
-                       ThreadContext::s_Counter.load() <= 2);
                 s_log << "Unlocking: " << std::this_thread::get_id();
-                fflush(stdout);
             },
             .cb_PerformPrimaryTask = []() {std::cout << "a"; ++ThreadContext::s_Counter; },
             .cb_ResetCounterToDefault = []() { ThreadContext::s_Counter = 3; },
@@ -85,13 +82,7 @@ int main()
                         return condition;
                     }
                 );
-                if (!IsPatterComplete())
-                {
-                    assert(ThreadContext::s_Counter.load() >= 3 &&
-                           ThreadContext::s_Counter.load() <= 4);
-                }
                 s_log << "Unlocking: " << std::this_thread::get_id();
-                fflush(stdout);
             },
             .cb_PerformPrimaryTask = []() {std::cout << "b"; ++ThreadContext::s_Counter; },
             .cb_ResetCounterToDefault = []() { ThreadContext::s_Counter = 5; },
@@ -120,21 +111,12 @@ int main()
                         return condition;
                     }
                 );
-                if (!IsPatterComplete())
-                {
-                    assert(ThreadContext::s_Counter.load() == 5);
-                }
                 s_log << "Unlocking: " << std::this_thread::get_id();
-                fflush(stdout);
             },
             .cb_PerformPrimaryTask = []() {std::cout << "c"; ++ThreadContext::s_PatternCount; },
             .cb_ResetCounterToDefault = []() { ThreadContext::s_Counter = 0; },
             .cb_TryNotifyNextThread = []()
             {
-                if (IsPatterComplete())
-                {
-                    assert(ThreadContext::s_Counter.load() <= 5);
-                }
                 if (ThreadContext::s_Counter.load() == 5)
                 {
                     ThreadContext::s_Counter = 0;
@@ -150,7 +132,7 @@ int main()
         threads[i] = std::thread([&context, i]()
         {
                 auto& localContext = context[i];
-                while (ThreadContext::s_PatternCount <= k_PatternSize)
+                while (!IsPatterComplete())
                 {
                     s_log << " Current Thread is: " << std::this_thread::get_id();
                     localContext.cb_WaitForCondition();

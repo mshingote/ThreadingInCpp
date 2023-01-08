@@ -10,3 +10,7 @@
 *.filters
 *.user
 /SynchronizeThreadsToPrint_aaabbc/SynchronizeThreadsToPrint_aaabbc/.vscode/*
+/SynchronizeThreadsToPrint_aaabbc/Debug/*
+/SynchronizeThreadsToPrint_aaabbc/Release/*
+/SynchronizeThreadsToPrint_aaabbc/SynchronizeThreadsToPrint_aaabbc/Debug/*
+/SynchronizeThreadsToPrint_aaabbc/SynchronizeThreadsToPrint_aaabbc/Release/*
